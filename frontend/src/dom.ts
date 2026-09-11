@@ -1,0 +1,60 @@
+export type Elements = ReturnType<typeof getElements>;
+
+export function getElements() {
+  return {
+    gameShell: document.querySelector<HTMLElement>("#game-shell")!,
+    canvas: document.querySelector<HTMLCanvasElement>("#game")!,
+    status: document.querySelector<HTMLElement>("#status")!,
+
+    roomDrawer: document.querySelector<HTMLElement>("#room-drawer")!,
+    roomDrawerToggle: document.querySelector<HTMLButtonElement>("#room-drawer-toggle")!,
+    spaces: document.querySelector<HTMLUListElement>("#spaces")!,
+    spaceInput: document.querySelector<HTMLInputElement>("#space-name")!,
+    spaceDescriptionInput: document.querySelector<HTMLInputElement>("#space-description")!,
+    spaceLayout: document.querySelector<HTMLSelectElement>("#space-layout")!,
+    createSpaceButton: document.querySelector<HTMLButtonElement>("#create-space")!,
+    currentSpaceName: document.querySelector<HTMLElement>("#current-space-name")!,
+    currentSpaceOwner: document.querySelector<HTMLElement>("#current-space-owner")!,
+    currentSpaceDescription: document.querySelector<HTMLElement>("#current-space-description")!,
+
+    members: document.querySelector<HTMLUListElement>("#members")!,
+    chatLog: document.querySelector<HTMLUListElement>("#chat-log")!,
+    messageInput: document.querySelector<HTMLInputElement>("#message")!,
+    sendButton: document.querySelector<HTMLButtonElement>("#send")!,
+
+    avatarControls: document.querySelector<HTMLElement>("#avatar-controls")!,
+    avatarEditor: document.querySelector<HTMLElement>("#avatar-editor")!,
+    avatarEditorForm: document.querySelector<HTMLFormElement>("#avatar-editor-form")!,
+    avatarEditorClose: document.querySelector<HTMLButtonElement>("#avatar-editor-close")!,
+    avatarPreset: document.querySelector<HTMLSelectElement>("#avatar-preset")!,
+    avatarSkinColor: document.querySelector<HTMLInputElement>("#avatar-skin-color")!,
+    avatarHairStyle: document.querySelector<HTMLSelectElement>("#avatar-hair-style")!,
+    avatarHairColor: document.querySelector<HTMLInputElement>("#avatar-hair-color")!,
+    avatarShirtStyle: document.querySelector<HTMLSelectElement>("#avatar-shirt-style")!,
+    avatarShirtColor: document.querySelector<HTMLInputElement>("#avatar-shirt-color")!,
+    avatarPantsStyle: document.querySelector<HTMLSelectElement>("#avatar-pants-style")!,
+    avatarPantsColor: document.querySelector<HTMLInputElement>("#avatar-pants-color")!,
+    avatarShoeStyle: document.querySelector<HTMLSelectElement>("#avatar-shoe-style")!,
+    avatarShoeColor: document.querySelector<HTMLInputElement>("#avatar-shoe-color")!,
+    avatarPreview: document.querySelector<HTMLCanvasElement>("#avatar-preview")!,
+    avatarEditorSave: document.querySelector<HTMLButtonElement>("#avatar-editor-save")!,
+
+    buildModeOpen: document.querySelector<HTMLButtonElement>("#build-mode-open")!,
+    buildTray: document.querySelector<HTMLElement>("#build-tray")!,
+    buildToggle: document.querySelector<HTMLButtonElement>("#build-toggle")!,
+    buildRemoveToggle: document.querySelector<HTMLButtonElement>("#build-remove-toggle")!,
+    buildClear: document.querySelector<HTMLButtonElement>("#build-clear")!,
+    buildHint: document.querySelector<HTMLElement>("#build-hint")!,
+    itemCatalog: document.querySelector<HTMLUListElement>("#item-catalog")!,
+
+    authScreen: document.querySelector<HTMLElement>("#auth-screen")!,
+    authLoginForm: document.querySelector<HTMLFormElement>("#auth-login-form")!,
+    authRegisterForm: document.querySelector<HTMLFormElement>("#auth-register-form")!,
+    authLoginName: document.querySelector<HTMLInputElement>("#auth-login-name")!,
+    authLoginPassword: document.querySelector<HTMLInputElement>("#auth-login-password")!,
+    authRegisterName: document.querySelector<HTMLInputElement>("#auth-register-name")!,
+    authRegisterEmail: document.querySelector<HTMLInputElement>("#auth-register-email")!,
+    authRegisterPassword: document.querySelector<HTMLInputElement>("#auth-register-password")!,
+    authError: document.querySelector<HTMLElement>("#auth-error")!,
+  };
+}

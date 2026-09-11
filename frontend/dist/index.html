@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Atrium</title>
+    <script type="module" crossorigin src="/assets/index-BN2Ce2Oo.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-C0qRUNT6.css">
+  </head>
+  <body>
+    <div id="auth-screen" class="auth-screen">
+      <section class="auth-shell">
+        <div class="auth-title">
+          <h1>Atrium</h1>
+          <p>Sign in or create your character.</p>
+        </div>
+
+        <div class="auth-forms">
+          <form id="auth-login-form" class="auth-card">
+            <h2>login</h2>
+            <label><span>username</span><input id="auth-login-name" maxlength="24" autocomplete="username" /></label>
+            <label><span>password</span><input id="auth-login-password" type="password" autocomplete="current-password" /></label>
+            <button type="submit">login</button>
+          </form>
+
+          <form id="auth-register-form" class="auth-card">
+            <h2>register</h2>
+            <label><span>username</span><input id="auth-register-name" maxlength="24" autocomplete="username" /></label>
+            <label><span>email</span><input id="auth-register-email" type="email" autocomplete="email" /></label>
+            <label><span>password</span><input id="auth-register-password" type="password" autocomplete="new-password" /></label>
+            <button type="submit">create account</button>
+          </form>
+        </div>
+
+        <p id="auth-error"></p>
+      </section>
+    </div>
+
+    <main id="game-shell" class="game-shell">
+      <header class="topbar shell-card">
+        <div class="brand-row">
+          <h1>Atrium</h1>
+          <button id="room-drawer-toggle" class="top-button" type="button">spaces</button>
+          <button id="build-mode-open" class="top-button" type="button">design</button>
+        </div>
+        <div class="top-status"><span id="status">offline</span></div>
+      </header>
+
+      <aside id="room-drawer" class="room-drawer shell-card">
+        <div class="drawer-content">
+          <div class="panel-head"><h2>spaces</h2></div>
+          <div class="create-space-form">
+            <input id="space-name" placeholder="space name" maxlength="32" />
+            <input id="space-description" placeholder="description" maxlength="180" />
+            <select id="space-layout"></select>
+            <button id="create-space">create space</button>
+          </div>
+          <ul id="spaces"></ul>
+        </div>
+      </aside>
+
+      <section class="main-layout">
+        <section class="stage-wrap shell-card">
+          <div class="stage-header glass-strip">
+            <div>
+              <strong id="current-space-name">Main</strong>
+              <span id="current-space-owner"></span>
+            </div>
+            <span id="current-space-description"></span>
+          </div>
+          <div class="stage-inner"><canvas id="game"></canvas></div>
+        </section>
+
+        <aside class="sidebar right-column">
+          <section class="shell-card panel-card character-panel">
+            <div class="panel-head"><h2>character</h2></div>
+            <div id="avatar-controls"></div>
+          </section>
+
+          <section class="shell-card panel-card members-panel">
+            <div class="panel-head"><h2>players</h2></div>
+            <ul id="members"></ul>
+          </section>
+        </aside>
+      </section>
+
+      <section id="build-tray" class="build-tray shell-card" hidden>
+        <div class="build-tray-head">
+          <div>
+            <h2>design mode</h2>
+            <span id="build-hint">choose an item, then click a tile</span>
+          </div>
+          <div class="build-actions">
+            <button id="build-remove-toggle" type="button">remove</button>
+            <button id="build-clear" type="button">clear</button>
+            <button id="build-toggle" type="button">done</button>
+          </div>
+        </div>
+        <ul id="item-catalog"></ul>
+      </section>
+
+      <section class="chat-strip shell-card panel-card">
+        <ul id="chat-log"></ul>
+        <div class="row">
+          <input id="message" placeholder="message" maxlength="160" />
+          <button id="send">send</button>
+        </div>
+      </section>
+
+      <section id="avatar-editor" class="editor-screen" hidden>
+        <form id="avatar-editor-form" class="editor-card shell-card">
+          <div class="panel-head">
+            <h2>edit character</h2>
+            <button id="avatar-editor-close" type="button">close</button>
+          </div>
+          <div class="avatar-editor-body">
+            <div class="avatar-preview-card">
+              <canvas id="avatar-preview" width="160" height="190"></canvas>
+              <p>Live preview</p>
+            </div>
+            <div class="editor-grid">
+              <label class="wide-field"><span>body shape</span><select id="avatar-preset"></select></label>
+              <label><span>skin</span><input id="avatar-skin-color" type="color" value="#b8754c" /></label>
+              <label><span>hair style</span><select id="avatar-hair-style"></select></label>
+              <label><span>hair</span><input id="avatar-hair-color" type="color" value="#211513" /></label>
+              <label><span>shirt style</span><select id="avatar-shirt-style"></select></label>
+              <label><span>shirt</span><input id="avatar-shirt-color" type="color" value="#4d8fd6" /></label>
+              <label><span>pants style</span><select id="avatar-pants-style"></select></label>
+              <label><span>pants</span><input id="avatar-pants-color" type="color" value="#263247" /></label>
+              <label><span>shoes</span><select id="avatar-shoe-style"></select></label>
+              <label><span>shoe color</span><input id="avatar-shoe-color" type="color" value="#111722" /></label>
+            </div>
+          </div>
+          <button id="avatar-editor-save" type="submit">save look</button>
+        </form>
+      </section>
+    </main>
+
+  </body>
+</html>
