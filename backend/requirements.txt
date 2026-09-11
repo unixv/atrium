@@ -1,0 +1,4 @@
+websockets==16.0
+pymongo>=4.13
+PyJWT>=2.10
+bcrypt>=5.0

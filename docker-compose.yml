@@ -1,0 +1,39 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: atrium-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: atrium
+      MONGO_INITDB_ROOT_PASSWORD: atrium-dev-password
+      MONGO_INITDB_DATABASE: atrium
+    ports:
+      - "27018:27017"
+    volumes:
+      - atrium-mongo-data:/data/db
+
+  server:
+    build: ./backend
+    container_name: atrium-server
+    environment:
+      ATRIUM_HOST: 0.0.0.0
+      ATRIUM_PORT: 8787
+      ATRIUM_LOG_LEVEL: DEBUG
+      ATRIUM_MAX_MESSAGE_SIZE: 4096
+      ATRIUM_MONGO_URI: mongodb://atrium:atrium-dev-password@mongo:27017/atrium?authSource=admin
+      ATRIUM_MONGO_DATABASE: atrium
+    ports:
+      - "8787:8787"
+    depends_on:
+      - mongo
+
+  web:
+    build: ./frontend
+    container_name: atrium-web
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+
+volumes:
+  atrium-mongo-data:
