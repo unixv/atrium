@@ -2,6 +2,7 @@ import { App } from "../app";
 import type { CatalogItem, Point } from "../types";
 import { RoomRenderer } from "./roomRenderer";
 import { openTile } from "./worldLayout";
+import { acceptsGameKeys, movementDelta } from "./keyboard";
 
 function walkable(app: App, x: number, y: number) {
   return openTile(app.state.layout, x, y) && !app.state.itemBlocksTile(x, y);
@@ -85,6 +86,17 @@ export function walkTo(app: App, x: number, y: number) {
 }
 
 export function setupMovement(app: App, renderer: RoomRenderer) {
+  window.addEventListener("keydown", event => {
+    if (event.repeat || app.state.buildMode || !acceptsGameKeys(event.target)) return;
+    const delta = movementDelta(event.key);
+    const me = app.state.me;
+    if (!delta || !me?.space) return;
+
+    event.preventDefault();
+    const drawn = app.state.drawn.get(me.id) ?? { x: me.x, y: me.y };
+    walkTo(app, Math.round(drawn.x) + delta.x, Math.round(drawn.y) + delta.y);
+  });
+
   app.el.canvas.addEventListener("mousemove", event => renderer.setHoverFromClient(event.clientX, event.clientY));
   app.el.canvas.addEventListener("mouseleave", () => renderer.clearHover());
 
