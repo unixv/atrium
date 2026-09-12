@@ -10,6 +10,9 @@ make dev
 
 Open http://localhost:5173.
 
+Click a floor tile to walk, or use the arrow keys/WASD. Keyboard movement is
+paused while typing in chat or another form and while arranging furniture.
+
 ## Useful commands
 
 ```bash
