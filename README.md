@@ -2,13 +2,17 @@
 
 Atrium is a small websocket multiplayer room prototype with Mongo-backed accounts, spaces, avatars, and placed room items.
 
-## Run
+## Run locally
+
+Install Docker with the Compose plugin, then from the repository root run:
 
 ```bash
 make dev
 ```
 
-Open http://localhost:5173.
+Compose builds the frontend and backend and starts MongoDB. Open http://localhost:5173.
+Stop with Ctrl+C, or run `make down` in another terminal. For a local
+frontend build without Docker, install Node.js and npm; backend checks need Python 3.10+.
 
 Click a floor tile to walk, or use the arrow keys/WASD. Keyboard movement is
 paused while typing in chat or another form and while arranging furniture.
@@ -16,7 +20,8 @@ paused while typing in chat or another form and while arranging furniture.
 ## Useful commands
 
 ```bash
-make check      # frontend build + backend compile
+make check      # frontend tests, typecheck, build + backend compile
+PYTHONPATH=backend python -m unittest discover -s backend/tests  # backend unit tests
 make logs       # stream docker logs
 make down       # stop containers
 make clean      # remove generated local caches

@@ -18,8 +18,9 @@ class Command(BaseCommand):
             return
 
         path: list[dict[str, int]] = []
-        last_x: int | None = None
-        last_y: int | None = None
+        # Anchor the first waypoint to the authoritative player position too.
+        last_x = client.x
+        last_y = client.y
 
         for raw_point in raw_path:
             if not isinstance(raw_point, dict):
@@ -28,25 +29,24 @@ class Command(BaseCommand):
 
             x = raw_point.get("x")
             y = raw_point.get("y")
-            if not isinstance(x, int) or not isinstance(y, int):
+            if type(x) is not int or type(y) is not int:
                 await app.send(client, "position.rejected", x=client.x, y=client.y)
                 return
 
-            if last_x is not None and last_y is not None:
-                dx = x - last_x
-                dy = y - last_y
-                if abs(dx) > 1 or abs(dy) > 1 or (dx == 0 and dy == 0):
+            dx = x - last_x
+            dy = y - last_y
+            if abs(dx) > 1 or abs(dy) > 1 or (dx == 0 and dy == 0):
+                await app.send(client, "position.rejected", x=client.x, y=client.y)
+                return
+
+            if dx != 0 and dy != 0:
+                # Prevent diagonal corner cutting, including at the first step.
+                if not await app.open_tile_for_space(client.space, last_x + dx, last_y):
                     await app.send(client, "position.rejected", x=client.x, y=client.y)
                     return
-
-                if dx != 0 and dy != 0:
-                    # Prevent diagonal corner cutting on the authoritative side too.
-                    if not await app.open_tile_for_space(client.space, last_x + dx, last_y):
-                        await app.send(client, "position.rejected", x=client.x, y=client.y)
-                        return
-                    if not await app.open_tile_for_space(client.space, last_x, last_y + dy):
-                        await app.send(client, "position.rejected", x=client.x, y=client.y)
-                        return
+                if not await app.open_tile_for_space(client.space, last_x, last_y + dy):
+                    await app.send(client, "position.rejected", x=client.x, y=client.y)
+                    return
 
             if not await app.open_tile_for_space(client.space, x, y):
                 await app.send(client, "position.rejected", x=client.x, y=client.y)
