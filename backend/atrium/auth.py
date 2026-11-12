@@ -6,7 +6,7 @@ from typing import Any
 
 import bcrypt
 import jwt
-from pydb.errors import DuplicateKeyError
+from sqlite3 import IntegrityError as DuplicateKeyError
 
 from atrium.database import db
 from atrium.models.avatar import DEFAULT_AVATAR, normalize_avatar
