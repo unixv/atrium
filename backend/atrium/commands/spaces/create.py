@@ -24,7 +24,7 @@ class Command(BaseCommand):
         if not isinstance(description, str):
             description = ""
 
-        created = await app.create_space_in_mongo(
+        created = await app.create_space_in_db(
             space=space,
             name=name,
             description=description,

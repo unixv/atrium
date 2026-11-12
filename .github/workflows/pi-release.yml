@@ -65,7 +65,24 @@ jobs:
                           second = json.loads(await asyncio.wait_for(ws.recv(), 2))
                           assert first["type"] == "server.ready", first
                           assert second["type"] == "identity.required", second
-                          await ws.send(base64.b64encode(json.dumps({"type": "spaces.list"}).encode()).decode())
+                          def encode(message):
+                              return base64.b64encode(json.dumps(message).encode()).decode()
+                          async def recv():
+                              return json.loads(base64.b64decode(await asyncio.wait_for(ws.recv(), 3)))
+                          await ws.send(encode({"type": "spaces.list"}))
+                          spaces = await recv()
+                          assert spaces["type"] == "spaces.list", spaces
+                          await ws.send(encode({"type": "auth.register",
+                              "name": "CiPlayer", "email": "ci-player@example.invalid",
+                              "password": "test-password-123"}))
+                          auth = await recv()
+                          assert auth["type"] == "auth.accepted", auth
+                          await ws.send(encode({"type": "space.create", "space": "ci-room"}))
+                          created = await recv()
+                          assert created["type"] == "space.created", created
+                          await ws.send(encode({"type": "space.join", "space": "ci-room"}))
+                          joined = await recv()
+                          assert joined["type"] == "space.joined", joined
                           return
                   except (OSError, TimeoutError):
                       await asyncio.sleep(.2)

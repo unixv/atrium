@@ -17,7 +17,7 @@ class Command(BaseCommand):
             return
 
         if space not in app.spaces:
-            exists = await app.load_space_from_mongo(space)
+            exists = await app.load_space_from_db(space)
             if not exists:
                 await app.send(client, "error", message="space does not exist")
                 return

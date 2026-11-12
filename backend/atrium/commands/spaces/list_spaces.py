@@ -6,5 +6,5 @@ class Command(BaseCommand):
     type = "spaces.list"
 
     async def run(self, app, client, message: dict) -> None:
-        await app.load_spaces_from_mongo()
+        await app.load_spaces_from_db()
         await app.send(client, "spaces.list", spaces=app.space_list(), layouts=app.layout_list())
