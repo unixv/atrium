@@ -1,0 +1,80 @@
+name: Build Atrium Raspberry Pi release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: atrium-pi-release
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Test and build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Test backend
+        run: |
+          python -m pip install -r backend/requirements.txt
+          PYTHONPATH=backend python -m unittest discover -s backend/tests
+          python -m compileall -q backend/atrium
+
+      - name: Assemble hardware-independent release
+        run: |
+          mkdir -p package/frontend package/deploy
+          cp -a backend package/backend
+          cp -a frontend/dist package/frontend/dist
+          cp -a deploy/pi package/deploy/pi
+          tar -C package -czf atrium-pi.tar.gz .
+          sha256sum atrium-pi.tar.gz > atrium-pi.tar.gz.sha256
+
+      - name: Confirm commit is still main
+        id: head
+        run: |
+          remote_head="$(git ls-remote origin refs/heads/main | cut -f1)"
+          if [ "$remote_head" = "$GITHUB_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Newer main commit exists; skipping obsolete release."
+            echo "current=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish release (Pi polls outbound)
+        if: steps.head.outputs.current == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="pi-${GITHUB_SHA}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release already exists: $tag"
+          else
+            gh release create "$tag" atrium-pi.tar.gz atrium-pi.tar.gz.sha256 \
+              --target "$GITHUB_SHA" \
+              --title "Atrium Pi $GITHUB_SHA" \
+              --notes "Automated tested ARMv6-targeted source and prebuilt frontend release." \
+              --latest
+          fi
