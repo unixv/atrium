@@ -1,0 +1,9 @@
+[Unit]
+Description=Poll GitHub for a tested Atrium Raspberry Pi release
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash /usr/local/sbin/atrium-update
+TimeoutStartSec=300
