@@ -249,7 +249,7 @@ class Atrium:
         owner_id: str | None,
         owner: str | None,
     ) -> bool:
-        from pydb.errors import DuplicateKeyError
+        from sqlite3 import IntegrityError as DuplicateKeyError
 
         now = datetime.now(timezone.utc)
         doc = {
