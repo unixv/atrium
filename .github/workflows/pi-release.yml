@@ -62,7 +62,7 @@ jobs:
                   try:
                       async with connect("ws://127.0.0.1:8787/ws", open_timeout=2) as ws:
                           first = json.loads(base64.b64decode(await asyncio.wait_for(ws.recv(), 2)))
-                          second = json.loads(await asyncio.wait_for(ws.recv(), 2))
+                          second = json.loads(base64.b64decode(await asyncio.wait_for(ws.recv(), 2)))
                           assert first["type"] == "server.ready", first
                           assert second["type"] == "identity.required", second
                           def encode(message):
