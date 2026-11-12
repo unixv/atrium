@@ -57,6 +57,8 @@ fi
 nginx -t
 systemctl daemon-reload
 systemctl enable --now nginx
+# nginx may already have started during apt installation; activate the new site.
+systemctl reload nginx
 systemctl enable --now atrium-update.timer
 
 echo "Downloading latest tested Atrium release..."
