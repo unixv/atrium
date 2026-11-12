@@ -41,6 +41,10 @@ tar -xzf "$stage/atrium-pi.tar.gz" -C "$stage/app" --no-same-owner --no-same-per
 test -f "$stage/app/backend/atrium/main.py"
 test -f "$stage/app/frontend/dist/index.html"
 python3 -m compileall -q "$stage/app/backend/atrium"
+# Retry safely after a prior deployment failed after unpacking.
+if [[ -d "$release" ]]; then
+  rm -rf -- "$release"
+fi
 mv "$stage/app" "$release"
 
 # Python dependencies are provisioned separately in the Pi's shared virtualenv.
