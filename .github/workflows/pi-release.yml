@@ -29,7 +29,7 @@ jobs:
       - name: Test and build frontend
         working-directory: frontend
         run: |
-          npm ci
+          npm ci --registry=https://registry.npmjs.org
           npm run build
 
       - name: Set up Python
@@ -40,10 +40,41 @@ jobs:
       - name: Test backend
         run: |
           python -m pip install -r backend/requirements.txt
-          PYTHONPATH=backend python -m unittest discover -s backend/tests
+          PYTHONPATH=backend python -m unittest discover -s backend/tests -v
           python -m compileall -q backend/atrium
 
-      - name: Assemble hardware-independent release
+      - name: WebSocket and SQLite integration smoke test
+        env:
+          ATRIUM_JWT_SECRET: ci-test-secret-never-use-in-production
+          ATRIUM_DB_PATH: ${{ runner.temp }}/atrium-ci.sqlite3
+          ATRIUM_HOST: 127.0.0.1
+          ATRIUM_PORT: '8787'
+        run: |
+          PYTHONPATH=backend python -m atrium.main > /tmp/atrium-server.log 2>&1 &
+          server_pid="$!"
+          trap 'kill "$server_pid" || true; cat /tmp/atrium-server.log' EXIT
+          PYTHONPATH=backend python - <<'PY'
+          import asyncio, json
+          from websockets.asyncio.client import connect
+
+          async def smoke():
+              for _ in range(30):
+                  try:
+                      async with connect("ws://127.0.0.1:8787/ws", open_timeout=2) as ws:
+                          first = json.loads(await asyncio.wait_for(ws.recv(), 2))
+                          second = json.loads(await asyncio.wait_for(ws.recv(), 2))
+                          assert first["type"] == "server.ready", first
+                          assert second["type"] == "identity.required", second
+                          await ws.send(json.dumps({"type": "spaces.list"}))
+                          return
+                  except (OSError, TimeoutError):
+                      await asyncio.sleep(.2)
+              raise AssertionError("Atrium server never became ready")
+
+          asyncio.run(smoke())
+          PY
+
+      - name: Assemble Raspberry Pi release
         run: |
           mkdir -p package/frontend package/deploy
           cp -a backend package/backend
@@ -59,22 +90,19 @@ jobs:
           if [ "$remote_head" = "$GITHUB_SHA" ]; then
             echo "current=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Newer main commit exists; skipping obsolete release."
             echo "current=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Publish release (Pi polls outbound)
+      - name: Publish release for Pi auto-update
         if: steps.head.outputs.current == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag="pi-${GITHUB_SHA}"
-          if gh release view "$tag" >/dev/null 2>&1; then
-            echo "Release already exists: $tag"
-          else
+          if ! gh release view "$tag" >/dev/null 2>&1; then
             gh release create "$tag" atrium-pi.tar.gz atrium-pi.tar.gz.sha256 \
               --target "$GITHUB_SHA" \
               --title "Atrium Pi $GITHUB_SHA" \
-              --notes "Automated tested ARMv6-targeted source and prebuilt frontend release." \
+              --notes "Tested Atrium backend and prebuilt frontend for Raspberry Pi Zero W." \
               --latest
           fi

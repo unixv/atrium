@@ -1,6 +1,6 @@
 # Atrium Alpha
 
-Atrium is a small websocket multiplayer room prototype with Mongo-backed accounts, spaces, avatars, and placed room items.
+Atrium is a small websocket multiplayer room prototype with SQLite-backed accounts, spaces, avatars, and placed room items.
 
 ## Run locally
 
@@ -10,9 +10,9 @@ Install Docker with the Compose plugin, then from the repository root run:
 make dev
 ```
 
-Compose builds the frontend and backend and starts MongoDB. Open http://localhost:5173.
+Compose builds the frontend and backend with a local SQLite database. Open http://localhost:5173.
 Stop with Ctrl+C, or run `make down` in another terminal. For a local
-frontend build without Docker, install Node.js and npm; backend checks need Python 3.10+.
+frontend build without Docker, install Node.js and npm; backend checks need Python 3.12+.
 
 Click a floor tile to walk, or use the arrow keys/WASD. Keyboard movement is
 paused while typing in chat or another form and while arranging furniture.
@@ -31,7 +31,7 @@ make clean      # remove generated local caches
 
 ```text
 backend/atrium/
-  app.py                         websocket app + Mongo-backed spaces/items
+  app.py                         websocket app + SQLite-backed spaces/items
   auth.py                        login/register/token helpers
   client.py                      connected player state
   world.py                       available room layouts
@@ -60,13 +60,17 @@ frontend/src/
     auth.ts, chat.ts, members.ts, spaces.ts
 ```
 
-## Mongo collections
+## SQLite tables
 
 ```text
 users        accounts and avatar data
 spaces       rooms, owners, descriptions, layout_id
 space_items  placed room items
 ```
+
+The persistent database is stored outside the release directory. See
+[Pi deployment](deploy/pi/README.md) to install Atrium on a Raspberry Pi Zero W
+and enable automatic updates from the `main` branch.
 
 ## Adding a room layout
 

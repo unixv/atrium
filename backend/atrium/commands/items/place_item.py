@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 
 from atrium.command import Command as BaseCommand
-from atrium.database import mongo
+from atrium.database import db
 from atrium.models.item_catalog import catalog_item
 
 
@@ -42,7 +42,7 @@ class Command(BaseCommand):
             "created_at": datetime.now(timezone.utc),
             "updated_at": datetime.now(timezone.utc),
         }
-        await mongo.collection("space_items").insert_one(doc)
+        await db.collection("space_items").insert_one(doc)
         view = app.item_view(doc)
 
         await app.publish(client.space, "item.placed", space=client.space, item=view)

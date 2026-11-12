@@ -1,5 +1,5 @@
 from atrium.command import Command as BaseCommand
-from atrium.database import mongo
+from atrium.database import db
 
 
 class Command(BaseCommand):
@@ -13,5 +13,5 @@ class Command(BaseCommand):
             await app.send(client, "error", message="only the owner can build here")
             return
 
-        await mongo.collection("space_items").delete_many({"space_id": client.space})
+        await db.collection("space_items").delete_many({"space_id": client.space})
         await app.publish(client.space, "items.cleared", space=client.space)

@@ -1,5 +1,5 @@
 from atrium.command import Command as BaseCommand
-from atrium.database import mongo
+from atrium.database import db
 
 
 class Command(BaseCommand):
@@ -15,7 +15,7 @@ class Command(BaseCommand):
             await app.send(client, "error", message="item id required")
             return
 
-        doc = await mongo.collection("space_items").find_one({"id": item_id, "space_id": client.space})
+        doc = await db.collection("space_items").find_one({"id": item_id, "space_id": client.space})
         if not doc:
             await app.send(client, "error", message="item not found")
             return

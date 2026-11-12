@@ -6,9 +6,9 @@ from typing import Any
 
 import bcrypt
 import jwt
-from pymongo.errors import DuplicateKeyError
+from pydb.errors import DuplicateKeyError
 
-from atrium.database import mongo
+from atrium.database import db
 from atrium.models.avatar import DEFAULT_AVATAR, normalize_avatar
 
 
@@ -29,7 +29,7 @@ class AuthError(Exception):
 
 
 async def ensure_auth_indexes() -> None:
-    users = mongo.collection("users")
+    users = db.collection("users")
     await users.create_index("id", unique=True)
     await users.create_index("name_lower", unique=True)
 
@@ -141,7 +141,7 @@ async def register_user(name_value: Any, password_value: Any, email_value: Any) 
     password = validate_password(password_value)
     email = validate_email(email_value)
 
-    users = mongo.collection("users")
+    users = db.collection("users")
 
     user = {
         "id": str(uuid.uuid4()),
@@ -167,7 +167,7 @@ async def login_user(name_value: Any, password_value: Any) -> tuple[dict, str]:
     name = validate_name(name_value)
     password = validate_password(password_value)
 
-    users = mongo.collection("users")
+    users = db.collection("users")
     user = await users.find_one({"name_lower": name.lower()})
 
     if not user:
@@ -189,7 +189,7 @@ async def user_from_token(token_value: Any) -> dict:
     if not isinstance(user_id, str):
         raise AuthError("invalid token")
 
-    users = mongo.collection("users")
+    users = db.collection("users")
     user = await users.find_one({"id": user_id})
 
     if not user:

@@ -1,3 +1,3 @@
-from atrium.database.mongodb import Mongo, mongo
+from atrium.database.sqlite import SQLiteStore, db
 
-__all__ = ["Mongo", "mongo"]
+__all__ = ["SQLiteStore", "db"]

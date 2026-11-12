@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from atrium.command import Command as BaseCommand
-from atrium.database import mongo
+from atrium.database import db
 from atrium.models.avatar import avatar_from_any, normalize_avatar
 
 
@@ -19,7 +19,7 @@ class Command(BaseCommand):
         normalized = normalize_avatar(merged)
         client.avatar = avatar_from_any(normalized)
 
-        await mongo.collection("users").update_one(
+        await db.collection("users").update_one(
             {"id": client.id},
             {"$set": {"avatar": normalized, "updated_at": datetime.now(timezone.utc)}},
         )

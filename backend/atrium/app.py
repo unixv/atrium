@@ -5,13 +5,12 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from pymongo import ReturnDocument
 from websockets.asyncio.server import serve
 from websockets.exceptions import ConnectionClosed
 
 from atrium.auth import ensure_auth_indexes
 from atrium.client import Client
-from atrium.database import mongo
+from atrium.database import db
 from atrium.encoder import Encoder
 from atrium.loader import load_commands
 from atrium.models.item_catalog import catalog_item
@@ -42,11 +41,11 @@ class Atrium:
 
     async def start(self) -> None:
         log.info("start host=%s port=%s max_message_size=%s", HOST, PORT, MAX_MESSAGE_SIZE)
-        await mongo.connect()
+        await db.connect()
         await ensure_auth_indexes()
         await self.ensure_space_indexes()
         await self.ensure_item_indexes()
-        await self.load_spaces_from_mongo()
+        await self.load_spaces_from_db()
         async with serve(self.connect, HOST, PORT, max_size=MAX_MESSAGE_SIZE):
             log.info("listening url=ws://%s:%s", HOST, PORT)
             await asyncio.Future()
@@ -155,19 +154,19 @@ class Atrium:
         return layout_view(self.layout_id_for_space(space))
 
     async def ensure_space_indexes(self) -> None:
-        spaces = mongo.collection("spaces")
+        spaces = db.collection("spaces")
         await spaces.create_index("id", unique=True)
         await spaces.create_index("owner_id")
         await spaces.create_index("updated_at")
 
     async def ensure_item_indexes(self) -> None:
-        items = mongo.collection("space_items")
+        items = db.collection("space_items")
         await items.create_index("id", unique=True)
         await items.create_index([("space_id", 1), ("x", 1), ("y", 1)])
 
     async def ensure_default_space(self) -> None:
         now = datetime.now(timezone.utc)
-        await mongo.collection("spaces").update_one(
+        await db.collection("spaces").update_one(
             {"id": "main"},
             {
                 "$setOnInsert": {
@@ -216,11 +215,11 @@ class Atrium:
         self.spaces.setdefault(normalized["id"], set())
         self.space_meta[normalized["id"]] = normalized
 
-    async def load_spaces_from_mongo(self) -> None:
+    async def load_spaces_from_db(self) -> None:
         await self.ensure_default_space()
 
         seen: set[str] = set()
-        async for doc in mongo.collection("spaces").find({}):
+        async for doc in db.collection("spaces").find({}):
             normalized = self.normalize_space_doc(doc)
             if not normalized:
                 continue
@@ -234,14 +233,14 @@ class Atrium:
             self.spaces.pop(space, None)
             self.space_meta.pop(space, None)
 
-    async def load_space_from_mongo(self, space: str) -> bool:
-        doc = await mongo.collection("spaces").find_one({"id": space})
+    async def load_space_from_db(self, space: str) -> bool:
+        doc = await db.collection("spaces").find_one({"id": space})
         if not doc:
             return False
         self.apply_space_doc(doc)
         return True
 
-    async def create_space_in_mongo(
+    async def create_space_in_db(
         self,
         space: str,
         name: str,
@@ -250,7 +249,7 @@ class Atrium:
         owner_id: str | None,
         owner: str | None,
     ) -> bool:
-        from pymongo.errors import DuplicateKeyError
+        from pydb.errors import DuplicateKeyError
 
         now = datetime.now(timezone.utc)
         doc = {
@@ -265,7 +264,7 @@ class Atrium:
         }
 
         try:
-            await mongo.collection("spaces").insert_one(doc)
+            await db.collection("spaces").insert_one(doc)
         except DuplicateKeyError:
             return False
 
@@ -279,10 +278,10 @@ class Atrium:
         if isinstance(description, str):
             update["description"] = description.strip()[:180]
 
-        result = await mongo.collection("spaces").find_one_and_update(
+        result = await db.collection("spaces").find_one_and_update(
             {"id": space},
             {"$set": update},
-            return_document=ReturnDocument.AFTER,
+            return_document=True,
         )
         if result:
             self.apply_space_doc(result)
@@ -319,7 +318,7 @@ class Atrium:
 
     async def items_for_space(self, space: str) -> list[dict[str, Any]]:
         items: list[dict[str, Any]] = []
-        cursor = mongo.collection("space_items").find({"space_id": space}).sort([("y", 1), ("x", 1), ("created_at", 1)])
+        cursor = db.collection("space_items").find({"space_id": space}).sort([("y", 1), ("x", 1), ("created_at", 1)])
         async for doc in cursor:
             view = self.item_view(doc)
             if view:
@@ -361,7 +360,7 @@ class Atrium:
         return view
 
     async def item_blocks_tile(self, space: str, x: int, y: int) -> bool:
-        async for doc in mongo.collection("space_items").find({"space_id": space}):
+        async for doc in db.collection("space_items").find({"space_id": space}):
             view = self.item_view(doc)
             if not view or not view["blocks_movement"]:
                 continue
@@ -387,7 +386,7 @@ class Atrium:
                     return False
 
         # Keep alpha building predictable: do not stack item bounding boxes yet.
-        async for doc in mongo.collection("space_items").find({"space_id": space}):
+        async for doc in db.collection("space_items").find({"space_id": space}):
             existing = self.item_view(doc)
             if not existing:
                 continue

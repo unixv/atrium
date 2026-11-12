@@ -11,7 +11,8 @@ export class Connection {
   ) {}
 
   connect() {
-    const url = `ws://${window.location.hostname}:8787`;
+    const scheme = window.location.protocol === "https:" ? "wss" : "ws";
+    const url = `${scheme}://${window.location.host}/ws`;
     this.socket = new WebSocket(url);
     this.onStatus("connecting");
 
