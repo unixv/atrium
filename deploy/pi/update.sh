@@ -57,7 +57,7 @@ systemctl restart "$SERVICE"
 
 # A successful TCP listen isn't sufficient: verify that the game is answering WebSockets.
 if ! python3 - <<'PY'
-import asyncio, json
+import asyncio, base64, json
 from websockets.asyncio.client import connect
 
 async def verify():
@@ -65,7 +65,7 @@ async def verify():
         try:
             async with connect("ws://127.0.0.1:8787/ws", open_timeout=2) as ws:
                 raw = await asyncio.wait_for(ws.recv(), timeout=3)
-                if json.loads(raw).get("type") == "server.ready":
+                if json.loads(base64.b64decode(raw)).get("type") == "server.ready":
                     return
         except (OSError, TimeoutError, ValueError, Exception):
             await asyncio.sleep(1)
