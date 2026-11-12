@@ -1,0 +1,11 @@
+[Unit]
+Description=Check for Atrium updates every two minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=2min
+AccuracySec=10s
+Unit=atrium-update.service
+
+[Install]
+WantedBy=timers.target
