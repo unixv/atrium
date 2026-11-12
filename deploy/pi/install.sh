@@ -56,6 +56,9 @@ if ss -ltn '( sport = :5000 )' | grep -q LISTEN; then
 fi
 nginx -t
 systemctl daemon-reload
+# Enable the game for automatic startup after a power outage.
+# The updater below performs the initial start after unpacking a release.
+systemctl enable atrium.service
 systemctl enable --now nginx
 # nginx may already have started during apt installation; activate the new site.
 systemctl reload nginx
